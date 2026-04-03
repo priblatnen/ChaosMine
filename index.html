@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Пантеон Древних | Minecraft Донаты</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Garamond', system-ui;
+        }
+
+        body.dark {
+            background: #0a0c12;
+            color: #e0d6b0;
+        }
+        body.light {
+            background: #f5f3ef;
+            color: #2c2418;
+        }
+
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            z-index: -2;
+            pointer-events: none;
+        }
+        body.dark .parallax-bg { background: radial-gradient(circle at 20% 40%, rgba(30, 20, 15, 0.4), rgba(0, 0, 0, 0.7)); }
+        body.light .parallax-bg { background: radial-gradient(circle at 20% 40%, rgba(200, 180, 140, 0.2), rgba(240, 235, 220, 0.5)); }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: #a8d8ff;
+            font-size: 1.2em;
+            user-select: none;
+            pointer-events: none;
+            z-index: 9999;
+            animation: fall linear forwards;
+        }
+        @keyframes fall { to { transform: translateY(100vh); opacity: 0.3; } }
+
+        .hero {
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        body.dark .hero { background: linear-gradient(135deg, #2c2b26 0%, #1f1d18 100%); }
+        body.light .hero { background: linear-gradient(135deg, #e0d6c0 0%, #c8bc98 100%); }
+        .hero h1 {
+            font-size: 3rem;
+            letter-spacing: 6px;
+            background: linear-gradient(135deg, #f5e2a4, #c4923a, #efcf74);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero p {
+            color: #d4c9a8;
+            margin-top: 0.5rem;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-bottom: 1px solid;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+        }
+        body.dark .nav-bar { background: #1e1a12; border-color: #5f5236; }
+        body.light .nav-bar { background: #fffef7; border-color: #d6bc80; }
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
+        }
+        body.dark .nav-btn { color: #e0d6b0; }
+        body.light .nav-btn { color: #5e4a2a; }
+        .nav-btn:hover, .nav-btn.active { background: #e6dcc0; color: #3d2e16; }
+
+        .section {
+            display: none;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease;
+        }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .shulker-bg {
+            background-repeat: repeat;
+            border-radius: 2rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        body.dark .shulker-bg { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.08"><polygon points="20,30 40,20 60,30 60,50 40,60 20,50" fill="%23926734"/><rect x="35" y="35" width="10" height="10" fill="%23b57c1c"/></svg>'); }
+        body.light .shulker-bg { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.12"><polygon points="20,30 40,20 60,30 60,50 40,60 20,50" fill="%23926734"/><rect x="35" y="35" width="10" height="10" fill="%23b57c1c"/></svg>'); }
+
+        .case-keys-info { font-size: 1.2rem; margin: 8px 0; font-weight: bold; text-align: center; }
+        
+        .roulette-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .roulette-item {
+            background: rgba(30, 26, 18, 0.8);
+            border-radius: 1rem;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            border: 1px solid #5f5236;
+            transition: all 0.2s ease;
+        }
+        body.light .roulette-item { background: rgba(255, 250, 235, 0.9); border-color: #d6bc80; }
+        .roulette-item .icon { font-size: 2rem; margin-bottom: 0.3rem; }
+        .roulette-item .icon img { width: 40px; height: 40px; vertical-align: middle; }
+        .roulette-item .name { font-size: 0.9rem; font-weight: bold; margin-bottom: 0.2rem; }
+        .roulette-item .price { font-size: 1rem; color: #ffcc44; }
+        .roulette-item .chance { font-size: 0.7rem; color: #b0a070; margin-top: 0.2rem; }
+        
+        .roulette-item.highlight {
+            background: #ff8c00;
+            border-color: #ffcc00;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
+        }
+
+        .spin-btn {
+            background: #6b4c2c;
+            border: none;
+            padding: 10px 28px;
+            font-size: 1.1rem;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            margin-top: 1rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .spin-btn.spinning {
+            background: #ffcc44;
+            color: #2c2418;
+            box-shadow: 0 0 20px #ffcc44;
+        }
+        .spin-btn:hover { box-shadow: 0 0 12px #ffcc44; transform: translateY(-2px); }
+
+        .gods-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .god-card {
+            background: rgba(30, 26, 18, 0.95);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            width: 170px;
+            text-align: center;
+            border: 1px solid #5f5236;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        body.light .god-card { background: rgba(255, 250, 235, 0.95); border-color: #d6bc80; }
+        .god-card:hover {
+            transform: scale(1.05);
+            border-color: #ffcc44;
+            box-shadow: 0 0 15px rgba(255, 204, 68, 0.4);
+        }
+        .god-card .god-icon img { width: 48px; height: 48px; margin-bottom: 0.5rem; }
+        .god-card .god-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.25rem; }
+        .god-card .price { font-size: 1.3rem; font-weight: bold; color: #ffcc44; margin: 0.5rem 0; }
+        
+        .btn-buy {
+            background: white;
+            border: 2px solid #ffcc44;
+            padding: 6px;
+            width: 100%;
+            border-radius: 48px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 8px;
+            color: #5e3a1a;
+            transition: all 0.2s ease;
+        }
+        .btn-buy:hover {
+            background: #ffcc44;
+            border-color: #ffcc44;
+            color: #2c2418;
+            box-shadow: 0 0 10px #ffcc44;
+        }
+
+        .titles-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .title-card {
+            background: rgba(30, 26, 18, 0.95);
+            border-radius: 1.5rem;
+            padding: 1rem;
+            width: 170px;
+            text-align: center;
+            border: 1px solid #5f5236;
+            transition: all 0.2s ease;
+        }
+        body.light .title-card { background: rgba(255, 250, 235, 0.95); border-color: #d6bc80; }
+        .title-card:hover {
+            transform: scale(1.05);
+            border-color: #ffcc44;
+        }
+        .title-card .title-preview { font-size: 1.3rem; font-weight: bold; margin: 8px 0; }
+
+        .admin-panel, .promo-section, .custom-title-section {
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border: 1px solid;
+        }
+        body.dark .admin-panel, body.dark .promo-section, body.dark .custom-title-section,
+        body.dark .generated-keys, body.dark .promo-list { background: #1e1a12; border-color: #5f5236; }
+        body.light .admin-panel, body.light .promo-section, body.light .custom-title-section,
+        body.light .generated-keys, body.light .promo-list { background: #f0ebdd; border-color: #d6bc80; }
+        .generated-keys, .promo-list {
+            border-radius: 1rem;
+            padding: 0.8rem;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 0.5rem;
+        }
+        .promo-item {
+            margin: 6px 0;
+            padding: 8px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: center;
+            background: #fff2df;
+        }
+        .promo-delete { background: #a5532b; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; color: white; }
+        .promo-input { background: white; border: 1px solid #c7aa6a; padding: 8px 16px; border-radius: 48px; width: 250px; }
+
+        .feed-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        .feed-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border-radius: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+        body.dark .feed-item { background: rgba(30, 26, 18, 0.7); border-left: 3px solid #ffcc44; }
+        body.light .feed-item { background: rgba(255, 250, 235, 0.7); border-left: 3px solid #d4a259; }
+        .feed-rare { border-left-color: #ff6600 !important; background: rgba(255, 102, 0, 0.15) !important; }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ffcc44;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(255, 204, 68, 0.5);
+        }
+        
+        .discord-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .discord-link a {
+            color: #ffcc44;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .discord-link a:hover {
+            text-shadow: 0 0 5px #ffcc44;
+        }
+        
+        footer { text-align: center; padding: 1.5rem; }
+        @media (max-width: 700px) {
+            .roulette-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+            .god-card, .title-card { width: 145px; }
+            .god-card .god-icon img { width: 36px; height: 36px; }
+        }
+    </style>
+</head>
+<body class="dark">
+<div class="parallax-bg"></div>
+
+<div class="hero">
+    <h1>✦ ПАНТЕОН ДРЕВНИХ ✦</h1>
+    <p>⚔️ Minecraft сервер | Донат-кейсы ⚔️</p>
+</div>
+
+<div class="nav-bar">
+    <button class="nav-btn active" data-section="case">🎲 КЕЙСЫ</button>
+    <button class="nav-btn" data-section="donate">💰 ДОНАТЫ</button>
+    <button class="nav-btn" data-section="titles">🏷️ ТИТУЛЫ</button>
+    <button class="nav-btn" data-section="feed">📰 ЛЕНТА</button>
+    <button class="nav-btn" data-section="profile">👤 ПРОФИЛЬ</button>
+</div>
+
+<div id="caseSection" class="section active">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="promo-section">
+            <input type="text" id="promoCodeInput" class="promo-input" placeholder="Промокод">
+            <button id="activatePromoBtn" class="btn-buy" style="background:#6b4c2c; color:white; border-color:#6b4c2c;">Активировать</button>
+        </div>
+        <div class="shulker-bg">
+            <h2 style="text-align:center">🏆 КОЛЕСО ДОНАТ-КЕЙСА 🏆</h2>
+            <div class="case-keys-info">⚜️ Ключей: <strong id="caseKeysCount">0</strong></div>
+            <div class="roulette-grid" id="rouletteGrid"></div>
+            <button id="spinRouletteBtn" class="spin-btn">🎲 ОТКРЫТЬ КЕЙС (1 ключ) 🎲</button>
+            <div id="rouletteResult" style="margin-top: 16px; background: rgba(0,0,0,0.3); border-radius: 2rem; padding: 12px; text-align:center">✨ Нажми на кнопку, чтобы запустить рулетку ✨</div>
+        </div>
+        <div class="shulker-bg">
+            <h2 style="text-align:center">🏷️ КЕЙС ТИТУЛОВ 🏷️</h2>
+            <div class="case-keys-info">🎫 Билетов: <strong id="ticketKeysCount">0</strong></div>
+            <button id="openTitleBtn" class="spin-btn">🎲 ОТКРЫТЬ КЕЙС ТИТУЛОВ (1 билет) 🎲</button>
+            <div id="titleResult" style="margin-top: 16px; background: rgba(0,0,0,0.3); border-radius: 2rem; padding: 12px; text-align:center">✨ Твой титул появится здесь ✨</div>
+        </div>
+        <div class="shulker-bg" style="background: #ffe8d4;">
+            <h2 style="text-align:center">⚡ ВСЁ ИЛИ НИЧЕГО ⚡</h2>
+            <div class="case-keys-info">🎲 Спец-ключей: <strong id="specialKeysCount">0</strong></div>
+            <button id="openSpecialBtn" class="spin-btn" style="background:#a5532b;">🔥 ОТКРЫТЬ (1 спец-ключ) 🔥</button>
+            <div id="specialResult" style="margin-top: 16px; background: rgba(0,0,0,0.3); border-radius: 2rem; padding: 12px; text-align:center">✨ Испытай удачу! ✨</div>
+        </div>
+    </div>
+</div>
+
+<div id="donateSection" class="section">
+    <div class="shulker-bg" style="max-width: 1200px; margin: 0 auto;">
+        <h2 style="text-align: center;">💰 ДРЕВНИЕ ДАРЫ</h2>
+        <div class="gods-grid" id="donatesGrid"></div>
+    </div>
+</div>
+
+<div id="titlesSection" class="section">
+    <div class="shulker-bg" style="max-width: 1200px; margin: 0 auto;">
+        <h2 style="text-align: center;">🏷️ ДОСТУПНЫЕ ТИТУЛЫ</h2>
+        <div class="titles-grid" id="titlesShopGrid"></div>
+        <div class="custom-title-section">
+            <h3>✨ КАСТОМНЫЙ ТИТУЛ ✨</h3>
+            <input type="text" id="customTitleInput" placeholder="Введите желаемый титул (до 20 символов)" style="padding: 8px 16px; border-radius: 60px; border: 1px solid #c7aa6a; width: 260px;">
+            <button id="buyCustomTitleBtn" class="btn-buy" style="background:#6b4c2c; color:white;">КУПИТЬ ЗА 30₽</button>
+        </div>
+    </div>
+</div>
+
+<div id="feedSection" class="section">
+    <div class="shulker-bg" style="max-width: 900px; margin: 0 auto;">
+        <h2 style="text-align: center;">📰 ЛЕНТА ОТКРЫТИЙ</h2>
+        <div class="feed-container" id="feedList"><div style="text-align:center; padding:2rem;">Загрузка...</div></div>
+    </div>
+</div>
+
+<div id="profileSection" class="section">
+    <div class="shulker-bg" style="max-width: 800px; margin: 0 auto; text-align: center;">
+        <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('avatarInput').click()" style="width:100px;height:100px;border-radius:50%;margin:0 auto 1rem;background:#ffcc44;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;overflow:hidden;"><span id="avatarPlaceholder">👤</span></div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none">
+        <h2 id="profileNick">Загрузка...</h2>
+        <textarea id="profileBio" rows="3" placeholder="Расскажите о себе..." style="width:100%; margin:1rem 0; padding:8px; border-radius:12px; background:#2a241a; border:1px solid #c7aa6a; color:inherit;"></textarea>
+        <button id="saveProfileBtn" class="btn-buy" style="background:#6b4c2c; color:white;">💾 СОХРАНИТЬ ПРОФИЛЬ</button>
+        <div style="margin-top:1rem; text-align:left;">
+            <h3>📊 Статистика</h3>
+            <p>🎲 Открыто кейсов: <strong id="statCases">0</strong></p>
+            <p>🏷️ Выиграно титулов: <strong id="statTitles">0</strong></p>
+            <p>🏆 Редких побед: <strong id="statRare">0</strong></p>
+        </div>
+    </div>
+</div>
+
+<div style="max-width: 1000px; margin: 20px auto 0; padding: 0 1rem;">
+    <div class="admin-panel" id="adminPanel">
+        <h3>⎊ АДМИН-ПАНЕЛЬ ⎊</h3>
+        <div id="adminLoginBlock">
+            <input type="password" id="adminPasswordInput" placeholder="Пароль" style="background:white; border:1px solid #c7aa6a; padding:6px 12px; border-radius:48px;">
+            <button id="adminLoginBtn" class="btn-buy">ВОЙТИ</button>
+        </div>
+        <div id="adminTools" style="display: none;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input type="number" id="keyAmount" value="1" style="width: 80px;">
+                <button id="generateKeysBtn" class="btn-buy">➕ КЛЮЧИ ДК</button>
+                <button id="generateTicketBtn" class="btn-buy">🎫 БИЛЕТЫ</button>
+                <button id="generateSpecialBtn" class="btn-buy">⚡ СПЕЦ-КЛЮЧИ</button>
+                <button id="clearKeysBtn" class="btn-buy">ОЧИСТИТЬ</button>
+            </div>
+            <div id="generatedKeysList" class="generated-keys"></div>
+            <h4>🎁 ПРОМОКОДЫ</h4>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input type="text" id="newPromoCode" placeholder="Код">
+                <input type="number" id="promoKeys" value="1" placeholder="Ключей" style="width: 80px;">
+                <input type="number" id="promoHours" value="24" placeholder="Часов" style="width: 80px;">
+                <input type="number" id="promoMaxUses" value="1" placeholder="Исп." style="width: 80px;">
+                <button id="createPromoBtn" class="btn-buy">СОЗДАТЬ</button>
+            </div>
+            <div id="promoList" class="promo-list"></div>
+            <div id="adminMsg"></div>
+        </div>
+    </div>
+</div>
+
+<button class="theme-toggle" id="themeToggle">🌙</button>
+<footer>
+    <div class="discord-link">
+        💬 ДС: <a href="https://discord.gg/6N48r6cPM" target="_blank">Жми</a> чтобы перейти
+    </div>
+    Пантеон Древних | По вопросам в поддержку
+</footer>
+
+<script>
+    // Иконки для донатов (картинки Minecraft предметов)
+    const donateIcons = {
+        "Оруженосец": "https://yandex.ru/images/search?pos=0&from=tabbar&img_url=https%3A%2F%2Fipfs.io%2Fipfs%2Fbafybeid2vvds5vgmfywqmrvpcpjfsqrilvk5mukt2u23iz2x2cenrwnala&text=уголь+майнкрафт&rpt=simage&lr=213",
+        "Странник": "https://yandex.ru/images/search?text=copper+ingot&pos=0&rpt=simage&img_url=https%3A%2F%2Fi2.wp.com%2Fmedia.forgecdn.net%2Favatars%2F396%2F202%2F637595508908606919.png&from=tabbar&lr=213",
+        "Мудрец": "https://yandex.ru/images/search?text=iron+ingot&pos=0&rpt=simage&img_url=https%3A%2F%2Fmedia.forgecdn.net%2Favatars%2F325%2F492%2F637443196807711289.png&from=tabbar&lr=213",
+        "Жрец": "https://yandex.ru/images/search?text=gold+ingot&pos=1&rpt=simage&img_url=https%3A%2F%2Fcdn.itemsatis.com%2Fuploads%2Fpost_images%2Fearthmc-altin-95249052.png&from=tabbar&lr=213",
+        "Рыцарь": "https://yandex.ru/images/search?text=lapis+minecraft&pos=20&rpt=simage&img_url=https%3A%2F%2Fyt3.googleusercontent.com%2Fytc%2FAIdro_niBwjei0XNQZfkZBnB5tENNvImUZ_D_DY_6x7x_rfKdA%3Ds900-c-k-c0x00ffffff-no-rj&from=tabbar&lr=213",
+        "Барон": "https://yandex.ru/images/search?text=emerald+minecraft&pos=0&rpt=simage&img_url=https%3A%2F%2Fimages.steamusercontent.com%2Fugc%2F62592696795324872%2F05BB0C7FCEF1CC0C580F08F9DE758B5F85DE95F1%2F%3Fimw%3D512%26amp%3Bimh%3D512%26amp%3Bima%3Dfit%26amp%3Bimpolicy%3DLetterbox%26amp%3Bimcolor%3D%2523000000%26amp%3Bletterbox%3Dtrue&from=tabbar&lr=213",
+        "Граф": "https://yandex.ru/images/search?text=diamond+minecraft&pos=0&rpt=simage&img_url=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F5a%2F9c%2Fb2%2F5a9cb25d0bcc8e13f5426404a2c13a8a.png&from=tabbar&lr=213",
+        "Князь": "https://yandex.ru/images/search?text=nether+quartz&pos=17&rpt=simage&img_url=https%3A%2F%2Fyt3.googleusercontent.com%2Fytc%2FAIdro_kCJ0dwtuO2TXxVPTzZEUhE-deCsycn9vLcdKqjyIFNMC4%3Ds900-c-k-c0x00ffffff-no-rj&from=tabbar&lr=213",
+        "Лорд": "https://yandex.ru/images/search?text=nether+ingot&pos=2&rpt=simage&img_url=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F31%2F6e%2F60%2F316e600903a67eb9d0ffcf602ddb25b6.png&from=tabbar&lr=213",
+        "Король": "https://yandex.ru/images/search?text=nether+star&pos=1&rpt=simage&img_url=https%3A%2F%2Fyt3.googleusercontent.com%2FhF3xdmKXgVzS_RBhhragSAvu0EQPO6oBfBCiIKT8t9dMgHODz1VRx53Kgpe0071kprRuDXSt%3Ds900-c-k-c0x00ffffff-no-rj&from=tabbar&lr=213"
+    };
+	
+    const ADMIN_PASSWORDS = ["4355516", "pigxd", "434411"];
+    const SPECIAL_PROMO_CODE = "allornothing";
+
+    const rewards = [
+        { name: "Оруженосец", price: 10, icon: donateIcons["Оруженосец"], weight: 45, chance: 31.3 },
+        { name: "Странник", price: 30, icon: donateIcons["Странник"], weight: 30, chance: 20.8 },
+        { name: "Мудрец", price: 50, icon: donateIcons["Мудрец"], weight: 22, chance: 15.3 },
+        { name: "Жрец", price: 80, icon: donateIcons["Жрец"], weight: 16, chance: 11.1 },
+        { name: "Рыцарь", price: 120, icon: donateIcons["Рыцарь"], weight: 12, chance: 8.3 },
+        { name: "Барон", price: 170, icon: donateIcons["Барон"], weight: 8, chance: 5.6 },
+        { name: "Граф", price: 250, icon: donateIcons["Граф"], weight: 5, chance: 3.5 },
+        { name: "Князь", price: 400, icon: donateIcons["Князь"], weight: 3, chance: 2.1 },
+        { name: "Лорд", price: 600, icon: donateIcons["Лорд"], weight: 2, chance: 1.4 },
+        { name: "Король", price: 1000, icon: donateIcons["Король"], weight: 1, chance: 0.7 }
+    ];
+    const totalWeight = rewards.reduce((a,b)=>a+b.weight,0);
+    function getRandomReward() {
+        let r = Math.random() * totalWeight;
+        let acc = 0;
+        for (let i=0; i<rewards.length; i++) { acc += rewards[i].weight; if (r <= acc) return { ...rewards[i] }; }
+        return { ...rewards[0] };
+    }
+
+    const titleRewards = [
+        { name: "Амням", display: "<span style='color:#2e7d32'>Амням</span>" },
+        { name: "#otpor", display: "<span style='color:#8b0000'>#otpor</span>" },
+        { name: "GAZAN", display: "<span style='color:#1e88e5'>GAZAN</span>" },
+        { name: "0_0", display: "<span style='color:#555'>0_0</span>" },
+        { name: "traper", display: "<span style='color:#111'>traper</span>" },
+        { name: "BRO9I", display: "<span style='color:#ff5722'>BRO9I</span>" }
+    ];
+
+    let currentUser = null, isAdminLoggedIn = false;
+    let users = JSON.parse(localStorage.getItem("medieval_users")) || {};
+    let generatedKeys = JSON.parse(localStorage.getItem("generated_keys")) || [];
+    let usedPromoCodes = JSON.parse(localStorage.getItem("used_promocodes")) || {};
+    let promoList = JSON.parse(localStorage.getItem("promo_list")) || [];
+    let feed = JSON.parse(localStorage.getItem("global_feed")) || [];
+
+    const presetUsers = {
+        "priblatnen": { password: "priblatnen123", caseKeys: 1, titleKeys: 1, specialKeys: 0, stats: { cases:0, titles:0, rare:0 }, bio: "", avatar: "" },
+        "sugarwhite": { password: "sugarwhite123", caseKeys: 1, titleKeys: 1, specialKeys: 0, stats: { cases:0, titles:0, rare:0 }, bio: "", avatar: "" },
+        "U1traP1g": { password: "U1traP1g123", caseKeys: 1, titleKeys: 1, specialKeys: 0, stats: { cases:0, titles:0, rare:0 }, bio: "", avatar: "" }
+    };
+    for (let [nick, data] of Object.entries(presetUsers)) if (!users[nick]) users[nick] = data;
+
+    function saveUsers() { localStorage.setItem("medieval_users", JSON.stringify(users)); saveSession(); }
+    function saveGeneratedKeys() { localStorage.setItem("generated_keys", JSON.stringify(generatedKeys)); renderGeneratedKeys(); }
+    function saveUsedPromoCodes() { localStorage.setItem("used_promocodes", JSON.stringify(usedPromoCodes)); }
+    function savePromoList() { localStorage.setItem("promo_list", JSON.stringify(promoList)); renderPromoList(); }
+    function saveFeed() { localStorage.setItem("global_feed", JSON.stringify(feed)); renderFeed(); }
+    function saveSession() { if(currentUser) localStorage.setItem("current_session", JSON.stringify({ nick: currentUser.nick, isAdmin: currentUser.isAdmin })); else localStorage.removeItem("current_session"); }
+    function loadSession() { const s = localStorage.getItem("current_session"); if(s) { const { nick, isAdmin } = JSON.parse(s); if(users[nick]) { currentUser = { ...users[nick], nick, isAdmin: isAdmin || users[nick].isAdmin }; return true; } } return false; }
+
+    function addToFeed(nick, reward, isRare) {
+        feed.unshift({ nick, reward: `${reward.name} (${reward.price}₽)`, isRare, time: new Date().toLocaleString() });
+        if (feed.length > 50) feed.pop();
+        saveFeed();
+    }
+
+    function renderFeed() {
+        const container = document.getElementById("feedList");
+        if (!container) return;
+        if (feed.length === 0) { container.innerHTML = "<div style='text-align:center; padding:2rem;'>Пока нет открытий</div>"; return; }
+        container.innerHTML = feed.map(f => `<div class="feed-item ${f.isRare ? 'feed-rare' : ''}"><span style="font-size:1.5rem;">${f.isRare ? '✨' : '🎲'}</span><div><strong>${f.nick}</strong> выиграл ${f.reward}</div><div style="font-size:0.7rem; margin-left:auto;">${f.time}</div></div>`).join('');
+    }
+
+    function renderGeneratedKeys() {
+        const cont = document.getElementById("generatedKeysList");
+        if(!cont) return;
+        if(!generatedKeys.length) { cont.innerHTML = "<div>Нет ключей</div>"; return; }
+        cont.innerHTML = generatedKeys.map(k => `<div style="background:#fff2df; margin:6px 0; padding:8px; border-radius:30px;">${k.type === 'title' ? '🎫' : k.type === 'special' ? '⚡' : '🗝️'} ${k.code} — ${k.type === 'title' ? 'билет' : k.type === 'special' ? 'спец-ключ' : k.keys+' ключей'}</div>`).join('');
+    }
+
+    function renderPromoList() {
+        const cont = document.getElementById("promoList");
+        if(!cont) return;
+        if(!promoList.length) { cont.innerHTML = "<div>Нет промокодов</div>"; return; }
+        cont.innerHTML = promoList.map((p, idx) => `<div class="promo-item"><span>${p.code}</span> — ${p.keys} ключей | Осталось: ${p.maxUses - (p.usedCount||0)}<button class="promo-delete" data-idx="${idx}">УДАЛИТЬ</button></div>`).join('');
+        document.querySelectorAll(".promo-delete").forEach(btn => { btn.onclick = () => { promoList.splice(parseInt(btn.dataset.idx),1); savePromoList(); }; });
+    }
+
+    function generateKey(amount, type='dk') {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i=0;i<12;i++) code += chars[Math.floor(Math.random()*chars.length)];
+        generatedKeys.unshift({ code, keys: amount, type });
+        saveGeneratedKeys();
+    }
+
+    function activateKey(code) {
+        const idx = generatedKeys.findIndex(k => k.code === code);
+        if(idx === -1) return null;
+        const key = generatedKeys[idx];
+        generatedKeys.splice(idx,1);
+        saveGeneratedKeys();
+        return key;
+    }
+
+    function enterUser(nick, pass) {
+        const isAdmin = ADMIN_PASSWORDS.includes(pass);
+        if(users[nick]) {
+            if(users[nick].password === pass || isAdmin) {
+                let ud = { ...users[nick] };
+                if(isAdmin && !ud.isAdmin) { ud.isAdmin = true; ud.caseKeys = 999; ud.titleKeys = 999; ud.specialKeys = 10; users[nick]=ud; saveUsers(); }
+                return { success: true, user: { nick, ...ud, isAdmin: ud.isAdmin || isAdmin } };
+            } else return { success: false, msg: "Неверный пароль" };
+        } else {
+            users[nick] = { password: pass, isAdmin, caseKeys: isAdmin ? 999 : 1, titleKeys: isAdmin ? 999 : 1, specialKeys: isAdmin ? 10 : 0, stats: { cases:0, titles:0, rare:0 }, bio: "", avatar: "" };
+            saveUsers();
+            return { success: true, user: { nick, ...users[nick] } };
+        }
+    }
+
+    function updateResource(nick, key, delta) {
+        if(users[nick]) { users[nick][key] = (users[nick][key]||0) + delta; saveUsers(); if(currentUser?.nick === nick) { currentUser[key] = users[nick][key]; document.getElementById(key === 'caseKeys' ? 'caseKeysCount' : (key === 'titleKeys' ? 'ticketKeysCount' : 'specialKeysCount')).innerText = currentUser[key]; } } }
+    function addCaseKeys(nick, amt) { updateResource(nick, 'caseKeys', amt); }
+    function addTitleKeys(nick, amt) { updateResource(nick, 'titleKeys', amt); }
+    function addSpecialKeys(nick, amt) { updateResource(nick, 'specialKeys', amt); }
+    function updateStats(nick, stat, delta) { if(users[nick]) { users[nick].stats = users[nick].stats || { cases:0, titles:0, rare:0 }; users[nick].stats[stat] = (users[nick].stats[stat]||0) + delta; saveUsers(); if(currentUser?.nick === nick) updateProfileUI(); } }
+
+    function createPromo(code, keys, hours, maxUses) {
+        if(promoList.some(p=>p.code===code)) return "Уже есть";
+        promoList.push({ code, keys: parseInt(keys), maxUses: parseInt(maxUses), usedCount: 0, expiresAt: hours>0 ? Date.now()+hours*3600000 : null });
+        savePromoList();
+        return `✅ ${code} создан`;
+    }
+
+    function activatePromoCode(code) {
+        if(!currentUser) return "Войдите";
+        if(code === SPECIAL_PROMO_CODE) { addSpecialKeys(currentUser.nick,1); return "🎉 +1 спец-ключ!"; }
+        const promo = promoList.find(p=>p.code===code);
+        if(!promo) return "Не найден";
+        if(promo.expiresAt && promo.expiresAt<Date.now()) return "Истёк";
+        if(promo.usedCount >= promo.maxUses) return "Лимит";
+        if(usedPromoCodes[currentUser.nick]?.includes(code)) return "Уже активирован";
+        addCaseKeys(currentUser.nick, promo.keys);
+        promo.usedCount++;
+        usedPromoCodes[currentUser.nick] = usedPromoCodes[currentUser.nick] || [];
+        usedPromoCodes[currentUser.nick].push(code);
+        savePromoList();
+        saveUsedPromoCodes();
+        return `🎉 +${promo.keys} ключей!`;
+    }
+
+    function createFireworks(x, y) {
+        const colors = ['#ff6600', '#ffcc00', '#ff3300', '#ff9900', '#ffff00'];
+        for (let i = 0; i < 60; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * 300 + 100;
+            const dx = Math.cos(angle) * velocity;
+            const dy = Math.sin(angle) * velocity;
+            particle.style.setProperty('--dx', dx + 'px');
+            particle.style.setProperty('--dy', dy + 'px');
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.width = '8px';
+            particle.style.height = '8px';
+            particle.style.borderRadius = '50%';
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.boxShadow = '0 0 5px currentColor';
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 1000);
+        }
+    }
+
+    let isSpinning = false;
+    let animationInterval = null;
+
+    function renderRoulette() {
+        const container = document.getElementById("rouletteGrid");
+        if (!container) return;
+        container.innerHTML = rewards.map(r => `
+            <div class="roulette-item" data-name="${r.name}">
+                <div class="icon"><img src="${r.icon}" alt="${r.name}" width="40" height="40"></div>
+                <div class="name">${r.name}</div>
+                <div class="price">${r.price}₽</div>
+                <div class="chance">${r.chance}%</div>
+            </div>
+        `).join('');
+    }
+
+    function highlightItem(index) {
+        const items = document.querySelectorAll('.roulette-item');
+        items.forEach(item => item.classList.remove('highlight'));
+        if (items[index]) items[index].classList.add('highlight');
+    }
+
+    function startRoulette(finalReward, onFinish) {
+        const totalSteps = 35 + Math.floor(Math.random() * 20);
+        let steps = 0;
+        let currentPos = Math.floor(Math.random() * rewards.length);
+        let speed = 100;
+        
+        function animate() {
+            currentPos = (currentPos + 1) % rewards.length;
+            highlightItem(currentPos);
+            steps++;
+            speed = Math.max(30, speed * 0.94);
+            
+            if (steps >= totalSteps) {
+                clearInterval(animationInterval);
+                const finalIndex = rewards.findIndex(r => r.name === finalReward.name);
+                highlightItem(finalIndex);
+                setTimeout(() => onFinish(finalReward), 500);
+                return;
+            }
+        }
+        animationInterval = setInterval(animate, speed);
+    }
+
+    function openCase() {
+        if (isSpinning) return;
+        if (!currentUser) { alert("Войдите"); return; }
+        if (currentUser.caseKeys < 1) {
+            let key = prompt("Нет ключей! Введите ключ:");
+            if (key) { let k = activateKey(key); if (k && k.type === 'dk') { addCaseKeys(currentUser.nick, k.keys); alert(`+${k.keys} ключей`); } else if (k?.type === 'title') { addTitleKeys(currentUser.nick, 1); alert("+1 билет"); } else if (k?.type === 'special') { addSpecialKeys(currentUser.nick, 1); alert("+1 спец-ключ"); } else alert("Неверный ключ"); }
+            return;
+        }
+        const reward = getRandomReward();
+        updateResource(currentUser.nick, 'caseKeys', -1);
+        updateStats(currentUser.nick, 'cases', 1);
+        if (reward.price >= 250) updateStats(currentUser.nick, 'rare', 1);
+        addToFeed(currentUser.nick, reward, reward.price >= 250);
+        
+        const spinBtn = document.getElementById("spinRouletteBtn");
+        spinBtn.classList.add("spinning");
+        isSpinning = true;
+        
+        startRoulette(reward, (final) => {
+            spinBtn.classList.remove("spinning");
+            isSpinning = false;
+            if (final.price >= 250) createFireworks(window.innerWidth/2, window.innerHeight/2);
+            alert(`🏆 ВЫПАЛО: ${final.name} (${final.price}₽)\nНапиши в поддержку!`);
+            document.getElementById("rouletteResult").innerHTML = `🏅 ВЫПАЛО: ${final.name} (${final.price}₽)<br>🎲 Шанс: ${final.chance}%<br>Напиши в поддержку!`;
+        });
+    }
+
+    function openTitleCase() {
+        if(!currentUser) { alert("Войдите"); return; }
+        if(currentUser.titleKeys < 1) {
+            let key = prompt("Нет билетов! Введите ключ:");
+            if(key) { let k = activateKey(key); if(k && k.type === 'title') { addTitleKeys(currentUser.nick,1); alert("+1 билет"); } else alert("Неверный ключ"); }
+            return;
+        }
+        const final = titleRewards[Math.floor(Math.random() * titleRewards.length)];
+        updateResource(currentUser.nick, 'titleKeys', -1);
+        updateStats(currentUser.nick, 'titles', 1);
+        alert(`🏷️ ВЫПАЛ ТИТУЛ: ${final.name}\nПоздравляем!`);
+        document.getElementById("titleResult").innerHTML = `🏷️ ВЫПАЛ: ${final.display}<br>Поздравляем!`;
+    }
+
+    function openSpecial() {
+        if(!currentUser) { alert("Войдите"); return; }
+        if(currentUser.specialKeys < 1) {
+            let key = prompt("Нет спец-ключа! Введите ключ:");
+            if(key) { let k = activateKey(key); if(k && k.type === 'special') { addSpecialKeys(currentUser.nick,1); alert("+1 спец-ключ"); } else alert("Неверный ключ"); }
+            return;
+        }
+        const win = Math.random() < 0.5;
+        updateResource(currentUser.nick, 'specialKeys', -1);
+        if(win) {
+            updateStats(currentUser.nick, 'rare', 1);
+            const fakeReward = { name: "Лорд", price: 600 };
+            addToFeed(currentUser.nick, fakeReward, true);
+            alert("⚡ ПОБЕДА! Вы выиграли донат Лорд (600₽)! Напишите в поддержку.");
+            document.getElementById("specialResult").innerHTML = "⚡ ПОБЕДА! Вы выиграли донат Лорд (600₽)!";
+        } else {
+            alert("❌ Увы... Вам ничего не выпало.");
+            document.getElementById("specialResult").innerHTML = "❌ Ничего не выпало...";
+        }
+    }
+
+    function renderDonates() {
+        const donates = [
+            { name: "Оруженосец", price: 10, icon: donateIcons["Оруженосец"] },
+            { name: "Странник", price: 30, icon: donateIcons["Странник"] },
+            { name: "Мудрец", price: 50, icon: donateIcons["Мудрец"] },
+            { name: "Жрец", price: 80, icon: donateIcons["Жрец"] },
+            { name: "Рыцарь", price: 120, icon: donateIcons["Рыцарь"] },
+            { name: "Барон", price: 170, icon: donateIcons["Барон"] },
+            { name: "Граф", price: 250, icon: donateIcons["Граф"] },
+            { name: "Князь", price: 400, icon: donateIcons["Князь"] },
+            { name: "Лорд", price: 600, icon: donateIcons["Лорд"] },
+            { name: "Король", price: 1000, icon: donateIcons["Король"] }
+        ];
+        const grid = document.getElementById("donatesGrid");
+        if(grid) {
+            grid.innerHTML = "";
+            donates.forEach(d => {
+                const card = document.createElement("div"); card.className = "god-card";
+                card.innerHTML = `<div class="god-icon"><img src="${d.icon}" alt="${d.name}" width="48" height="48"></div><div class="god-name">${d.name}</div><div class="price">${d.price} ₽</div><button class="btn-buy" data-god="${d.name}">КУПИТЬ</button>`;
+                grid.appendChild(card);
+            });
+            document.querySelectorAll(".btn-buy[data-god]").forEach(btn => btn.onclick = () => window.open("https://funpay.com/users/14796922/", "_blank"));
+        }
+    }
+
+    function renderTitlesShop() {
+        const shop = [
+            { name: "Амням", price: 10, color: "green" }, { name: "#otpor", price: 10, color: "darkred" }, { name: "GAZAN", price: 10, color: "blue" },
+            { name: "0_0", price: 10, color: "gray" }, { name: "traper", price: 15, color: "black" }, { name: "BRO9I", price: 15, color: "orangered" }
+        ];
+        const grid = document.getElementById("titlesShopGrid");
+        if(grid) {
+            grid.innerHTML = "";
+            shop.forEach(t => {
+                const card = document.createElement("div"); card.className = "title-card";
+                card.innerHTML = `<div class="title-preview" style="color:${t.color}">${t.name}</div><div class="price">${t.price} ₽</div><button class="btn-buy buy-title-shop">КУПИТЬ</button>`;
+                grid.appendChild(card);
+            });
+            document.querySelectorAll(".buy-title-shop").forEach(btn => btn.onclick = () => window.open("https://funpay.com/users/14796922/", "_blank"));
+        }
+    }
+
+    function updateProfileUI() {
+        if(currentUser && document.getElementById("profileNick")) {
+            document.getElementById("profileNick").innerText = currentUser.nick;
+            document.getElementById("profileBio").value = currentUser.bio || "";
+            document.getElementById("statCases").innerText = currentUser.stats?.cases || 0;
+            document.getElementById("statTitles").innerText = currentUser.stats?.titles || 0;
+            document.getElementById("statRare").innerText = currentUser.stats?.rare || 0;
+            if(currentUser.avatar) document.getElementById("avatarPlaceholder").innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover">`;
+            else document.getElementById("avatarPlaceholder").innerHTML = "👤";
+        }
+    }
+
+    function isProfane(t) { const bad = ["хуй","пизда","бля","еба","мудак","гандон","сука","пидор","лох","редиска","дурак","идиот","дебил","уебок","нахуй","пиздец","залупа","шлюха","блядина","хуесос"]; return bad.some(w => t.toLowerCase().includes(w)); }
+
+    let isDark = true;
+    document.getElementById("themeToggle").onclick = () => {
+        isDark = !isDark;
+        document.body.classList.toggle("light", !isDark);
+        document.body.classList.toggle("dark", isDark);
+        document.getElementById("themeToggle").innerHTML = isDark ? "🌙" : "☀️";
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+    };
+    if(localStorage.getItem("theme") === "light") document.getElementById("themeToggle").click();
+
+    window.addEventListener("scroll", () => { const scrolled = window.pageYOffset; const parallax = document.querySelector(".parallax-bg"); if (parallax) parallax.style.transform = `translateY(${scrolled * 0.3}px)`; });
+
+    const authHtml = `<div id="authModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:flex; align-items:center; justify-content:center;"><div style="background:#fffcf0; border-radius:2rem; padding:2rem; width:360px; text-align:center;"><h2>✦ ВХОД ✦</h2><input type="text" id="authNick" placeholder="Ник"><br><input type="password" id="authPass" placeholder="Пароль"><br><button id="enterBtn" style="background:#6b4c2c; color:white; border:none; padding:10px 20px; border-radius:60px; margin-top:10px;">ВОЙТИ</button><div id="authError" style="color:red; margin-top:8px;"></div></div></div>`;
+    document.body.insertAdjacentHTML('afterbegin', authHtml);
+    document.getElementById("enterBtn").onclick = () => {
+        const nick = document.getElementById("authNick").value.trim();
+        const pass = document.getElementById("authPass").value.trim();
+        if(!nick || !pass) { document.getElementById("authError").innerText = "Введите ник и пароль"; return; }
+        const res = enterUser(nick, pass);
+        if(res.success) {
+            currentUser = res.user;
+            document.getElementById("authModal").remove();
+            document.getElementById("caseKeysCount").innerText = currentUser.caseKeys;
+            document.getElementById("ticketKeysCount").innerText = currentUser.titleKeys;
+            document.getElementById("specialKeysCount").innerText = currentUser.specialKeys || 0;
+            renderDonates(); renderTitlesShop(); updateProfileUI(); renderFeed(); renderRoulette();
+            saveSession();
+        } else { document.getElementById("authError").innerText = res.msg; }
+    };
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+            document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+            document.getElementById(btn.dataset.section+"Section").classList.add("active");
+            if(btn.dataset.section === "profile") updateProfileUI();
+            if(btn.dataset.section === "feed") renderFeed();
+            if(btn.dataset.section === "case") renderRoulette();
+        };
+    });
+
+    document.getElementById("adminLoginBtn").onclick = () => {
+        if(ADMIN_PASSWORDS.includes(document.getElementById("adminPasswordInput").value)) {
+            isAdminLoggedIn = true;
+            document.getElementById("adminLoginBlock").style.display = "none";
+            document.getElementById("adminTools").style.display = "block";
+            renderGeneratedKeys(); renderPromoList();
+        } else alert("Неверный пароль");
+    };
+    document.getElementById("generateKeysBtn").onclick = () => { if(isAdminLoggedIn) generateKey(parseInt(document.getElementById("keyAmount").value)||1, 'dk'); };
+    document.getElementById("generateTicketBtn").onclick = () => { if(isAdminLoggedIn) generateKey(1, 'title'); };
+    document.getElementById("generateSpecialBtn").onclick = () => { if(isAdminLoggedIn) generateKey(1, 'special'); };
+    document.getElementById("clearKeysBtn").onclick = () => { if(isAdminLoggedIn) { generatedKeys = []; saveGeneratedKeys(); } };
+    document.getElementById("createPromoBtn").onclick = () => {
+        if(!isAdminLoggedIn) return;
+        const code = document.getElementById("newPromoCode").value.trim();
+        const keys = parseInt(document.getElementById("promoKeys").value);
+        const hours = parseInt(document.getElementById("promoHours").value);
+        const uses = parseInt(document.getElementById("promoMaxUses").value);
+        if(!code) return;
+        document.getElementById("adminMsg").innerHTML = createPromo(code, keys, hours, uses);
+        document.getElementById("newPromoCode").value = "";
+    };
+    document.getElementById("activatePromoBtn").onclick = () => {
+        const code = document.getElementById("promoCodeInput").value.trim();
+        if(!code) { alert("Введите промокод"); return; }
+        alert(activatePromoCode(code));
+        document.getElementById("promoCodeInput").value = "";
+    };
+    document.getElementById("spinRouletteBtn").onclick = openCase;
+    document.getElementById("openTitleBtn").onclick = openTitleCase;
+    document.getElementById("openSpecialBtn").onclick = openSpecial;
+    
+    document.getElementById("saveProfileBtn").onclick = () => {
+        if(currentUser) {
+            users[currentUser.nick].bio = document.getElementById("profileBio").value;
+            saveUsers();
+            alert("Профиль сохранён!");
+        }
+    };
+    document.getElementById("avatarInput").onchange = (e) => {
+        const file = e.target.files[0];
+        if(file && currentUser) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                users[currentUser.nick].avatar = ev.target.result;
+                saveUsers();
+                updateProfileUI();
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    if(loadSession()) {
+        document.getElementById("authModal").style.display = "none";
+        document.getElementById("caseKeysCount").innerText = currentUser.caseKeys;
+        document.getElementById("ticketKeysCount").innerText = currentUser.titleKeys;
+        document.getElementById("specialKeysCount").innerText = currentUser.specialKeys || 0;
+        renderDonates(); renderTitlesShop(); updateProfileUI(); renderFeed(); renderRoulette();
+    }
+
+    renderGeneratedKeys();
+    setInterval(() => { if(isAdminLoggedIn) renderPromoList(); }, 60000);
+    function createSnow() { const s = document.createElement('div'); s.classList.add('snowflake'); s.innerHTML = '❄️'; s.style.left = Math.random() * window.innerWidth + 'px'; s.style.fontSize = (Math.random() * 16 + 10) + 'px'; s.style.animationDuration = (Math.random() * 5 + 3) + 's'; s.style.opacity = Math.random() * 0.6 + 0.2; document.body.appendChild(s); setTimeout(() => s.remove(), 8000); }
+    setInterval(createSnow, 400);
+</script>
+</body>
+</html>
